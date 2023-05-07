@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+<script src="scripts/midiwriter.js"></script>
+    <script
+			type="text/javascript"
+			src="https://unpkg.com/@tonejs/midi"
+		></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <meta charset="utf-8" />
+
+  </head>
+  <body>
+    <main style="padding-top:20px; width: 60%; margin: 0 auto;">
+       <h3 id="title">
+         Midi file to Solresol<span style="margin-left:12px;font-size:12px;color:#777">V.1</span></h3>
+      <div class="controls">
+      <input id="file-input" type="file">
+    </div>
+      <br>
+       <div id="info1" style="width:450px"></div>
+       <div id="playerzone" style="display:none">
+        <section id="section15" style="text-align:left;color:#000">
+       <midi-player
+          id="player15"
+          src=""
+          loop
+          sound-font
+          visualizer="#section15"
+        >
+        </midi-player>
+        <midi-visualizer type="staff"> </midi-visualizer>
+      </section> 
+      <div id="infotrack" style="color:#fff;font-size:12px;margin:2px;margin-left: 36px;margin-bottom:10px;width:450px"></div>
+          </div>
+       <button
+        id="expi"
+        class="bute"
+        style="float:left;
+    margin-left: 6px;margin-top: 12px;display:none;"
+      >Export</button>
+       <div id="info" style= "margin:3px; width:450px;"></div><br>
+        <div id="info2" style="margin-bottom:50px;width:450px"></div>
+    </main>
+     <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.5.0"></script>
+    <script src="scripts/sketch.js"></script>
+  </body>
+</html>
