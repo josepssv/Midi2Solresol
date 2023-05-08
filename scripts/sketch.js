@@ -628,7 +628,7 @@ function charged() {
   expi.show();
   expi.mousePressed(function () {
      info.html(
-      '<br><a id="linktext" download="'+nameFileTrack+'"  href="' +
+      '<br><a id="linktext" download="'+nameFileTrack+'.mid"  href="' +
         escribe.dataUri() +
         '">'+nameFileTrack+'.mid</a>&nbsp;' +
         //'<a id="linktextWav" href="' +
