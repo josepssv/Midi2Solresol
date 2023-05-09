@@ -2,50 +2,88 @@
 <html lang="en">
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
-<script src="scripts/midiwriter.js"></script>
+    <script src="scripts/midiwriter.js"></script>
     <script
-			type="text/javascript"
-			src="https://unpkg.com/@tonejs/midi"
-		></script>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+      type="text/javascript"
+      src="https://unpkg.com/@tonejs/midi"
+    ></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
     <meta charset="utf-8" />
-
   </head>
   <body>
     <main style="padding-top:20px; width: 60%; margin: 0 auto;">
-       <h3 id="title">
-         Midi file to Solresol<span style="margin-left:12px;font-size:12px;color:#777">V.1</span></h3>
-      <div class="controls">
-      <input id="file-input" type="file">
-    </div>
-      <br>
-       <div id="info1" style="width:450px"></div>
-       <div id="playerzone" style="display:none">
-        <section id="section15" style="text-align:left;color:#000">
-       <midi-player
-          id="player15"
-          src=""
-          loop
-          sound-font
-          visualizer="#section15"
+      <h3 id="title">
+        Midi file to Solresol<span
+          style="margin-left:12px;font-size:12px;color:#777"
+          >V.2</span
         >
-        </midi-player>
-        <midi-visualizer type="staff"> </midi-visualizer>
-      </section> 
-      <div id="infotrack" style="color:#fff;font-size:12px;margin:2px;margin-left: 36px;margin-bottom:10px;width:450px"></div>
-          </div>
-       <button
-        id="expi"
-        class="bute"
-        style="float:left;
-    margin-left: 6px;margin-top: 12px;display:none;"
-      >Export</button>
-      <br>
-      <div id="info" style= "margin:3px; width:450px;"></div>
-      <br>
-        <div id="info2" style="margin-bottom:50px;width:450px"></div>
+      </h3>
+      <div class="controls">
+        <input id="file-input" type="file" />
+      </div>
+      <br />
+      <div id="info1" style="width:450px"></div>
+      <div id="playerzone" style="display:none">
+        <section id="section15" style="text-align:left;color:#000">
+          <midi-player
+            id="player15"
+            src=""
+            loop
+            sound-font
+            visualizer="#section15"
+          >
+          </midi-player>
+          <midi-visualizer type="staff"> </midi-visualizer>
+        </section>
+        <div
+          id="infotrack"
+          style="color:#fff;font-size:12px;margin:2px;margin-left: 36px;margin-bottom:10px;width:450px;"
+        ></div>
+        <div id="ileft" style="color:#995;width:450px;font-size:16px;"></div>
+        <table style="width:350px;"><tr><td id="iSolresol" style="font-size:12px;"></td> <td id="iSolresolr" style="text-align:right;font-size:12px;"></td></tr></table>
+      </div>
+
+      <div>
+        <button
+          id="expi"
+          class="bute"
+          style="clear:both;margin-left: 6px;margin-top: 22px;display:none;"
+        >
+          Export
+        </button>
+      </div>
+      <br />
+      <div id="info" style="margin:3px; width:450px;"></div>
+      <br />
+      <div id="info2" style="margin-bottom:50px;width:450px"></div>
+      <div style="margin:50px 0px 180px 0px ;white-space: pre;">
+      <code>
+Thanks to
+        <a href="https://sidosi.org/" target="_blank"
+           >Sidosi.org</a>
+        <a href="https://grimmdude.com/MidiWriterJS/docs/" target="_blank"
+          >MidiWriterJS</a
+        >
+        <a href="https://github.com/cifkao/html-midi-player" target="_blank"
+          >cifkao/html-midi-player  Magenta </a
+        >
+        <a href="https://tonejs.github.io/docs/" target="_blank">Tone.js</a>
+        <a href="https://wikiloops.com" target="_blank">Wikiloops</a>
+        <a href="https://chat.openai.com/chat" target="_blank">ChatGPT</a>
+        
+        
+Contributions
+        <a href="https://www.wikiloops.com/artist/josepssv.php" target="_blank">Josepssv</a>
+        
+<!--Code
+        <a href="https://github.com/josepssv/" target="_blank">Github</a>-->
+<!--Track
+        <a href="https://www.wikiloops.com/backingtrack-jam-267281.php" target="_blank">Our house</a>
+-->
+   </code>
+    </div>
     </main>
-     <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.5.0"></script>
+    <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.5.0"></script>
     <script src="scripts/sketch.js"></script>
   </body>
 </html>
