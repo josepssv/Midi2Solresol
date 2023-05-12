@@ -1,26 +1,28 @@
 const mias = {
-  "c8": 8,
-  "c4": 4,
-  "c2": 2,
-  "1": 1,
-  "2": 0.5,
-  "4": 0.25,
-  "8": 0.125,
-  "16": 0.0625,
-  "32": 0.03125,
-  "64": 0.015625,
-  "dd2": 0.875,
-  "d2": 0.75,
-  "dd4": 0.4375,
-  "d4": 0.375,
+  c8: 8,
+  c4: 4,
+  c2: 2,
+  1: 1,
+  2: 0.5,
+  4: 0.25,
+  8: 0.125,
+  16: 0.0625,
+  32: 0.03125,
+  64: 0.015625,
+  dd2: 0.875,
+  d2: 0.75,
+  dd4: 0.4375,
+  d4: 0.375,
   "4t": 0.21875,
-  "dd8": 0.21875,
-  "d8": 0.1875,
+  dd8: 0.21875,
+  d8: 0.1875,
   "8t": 0.109375,
   "16t": 0.0546875,
-  "dd16": 0.109375,
-  "d16": 0.09375,
+  dd16: 0.109375,
+  d16: 0.09375,
 };
+var PPQ1 = 120;
+var PPQ2 = 120;
 var Mias = {};
 var suite;
 var solresol;
@@ -30,6 +32,15 @@ var nameFileTrack = "";
 var resultParts = [];
 var tracks = [];
 var escribe;
+var BPM = 120;
+var divi;
+var contBeat = 1;
+var contEvent=1
+var solre = "";
+var cumulNote = "";
+var cumulSolr = "";
+var cumulAbc = "";
+var cumulRhy = "";
 
 function handleFiles() {
   const fileList = this.files; /* now you can work with the file list */
@@ -63,6 +74,8 @@ function preload() {
 function setup() {
   noCanvas();
   createMetaTag();
+   divi = document.getElementById("player15");
+  divi.addEventListener("note", eventNote, false);
   //input = select("#file-input")
   inputfile = document.getElementById("file-input");
   inputfile.addEventListener("change", handleFiles, false);
@@ -111,7 +124,10 @@ function toSolresolR() {
 
 function otro(nt, compi) {
   tracks[nt].addEvent(
-    new MidiWriter.ProgramChangeEvent({ instrument: compi[0] })
+    new MidiWriter.ProgramChangeEvent({
+      instrument: compi[0],
+      channel: compi[5],
+    })
   );
   tracks[nt].addEvent(
     new MidiWriter.NoteEvent({
@@ -126,8 +142,8 @@ function otro(nt, compi) {
   );
 }
 function toSolresolP(ntrack) {
-  var PPQ1 = 120;
-  var PPQ2 = suite.header.ppq;
+  PPQ1 = 120;
+  PPQ2 = suite.header.ppq;
   Mias = equalizePPQ(PPQ1, PPQ2);
 
   //Mias={...mias}
@@ -138,16 +154,25 @@ function toSolresolP(ntrack) {
   //console.log(JSON.stringify(suite));
   var nt = 0;
   tracks[nt] = new MidiWriter.Track();
-  var ts =[4,4]
-  if(suite.header.timeSignatures.length>0){
-  ts = suite.header.timeSignatures[0].timeSignature;
+  var ts = [4, 4];
+  if (suite.header.timeSignatures.length > 0) {
+    ts = suite.header.timeSignatures[0].timeSignature;
   }
+  var instr = Number(suite.tracks[ntrack].instrument.number);
+  var instrn = suite.tracks[ntrack].instrument.name;
+  var channel = suite.tracks[ntrack].channel + 1;
   tracks[nt].setTimeSignature(ts[0], ts[1]);
+  //tracks[nt].addInstrumentName(instrn)
+  tracks[nt].addEvent(
+    new MidiWriter.ProgramChangeEvent({ instrument: instr, channel: channel })
+  );
   //tracks[nt].setTempo(120);
-
+  BPM = suite.header.tempos[0].bpm;
   //tracks[nt].setTimeSignature(suite.header.timeSignatures[0],   suite.header.timeSignatures[1]);
-  tracks[nt].setTempo(suite.header.tempos[0].bpm);
-  var instr = suite.tracks[ntrack].instrument.number;
+  tracks[nt].setTempo(BPM);
+  console.log(JSON.stringify(suite.tracks[ntrack].instrument));
+
+  //console.log('instr ',instr)
   var compo = [];
 
   for (var a = 0; a < Notes.length; a++) {
@@ -157,7 +182,7 @@ function toSolresolP(ntrack) {
     compo[2] = 0;
     compo[3] = [Notes[a].name];
     compo[4] = "T" + Notes[a].durationTicks;
-    compo[5] = suite.tracks[ntrack].channel+1;
+    compo[5] = channel;
     compo[6] = 1;
     compo[7] = false;
     //console.log(JSON.stringify(Notes[a]))
@@ -173,11 +198,11 @@ function toSolresolP(ntrack) {
   var playi = select("#player15");
   playi.attribute("src", escribe.dataUri());
   select("#info2").html("");
-  notesBlock(ntrack);
+  //notesBlock(ntrack);
 }
 
 function notesBlock(ntrack) {
-  var PPQ2 = suite.header.ppq;
+  PPQ2 = suite.header.ppq;
 
   var notesSolr = [];
   var notesSol = "";
@@ -188,31 +213,29 @@ function notesBlock(ntrack) {
   var four = [];
   var signis = [];
   var notis = [];
-  var nomes=[]
+  var nomes = [];
   var duration = [];
   var solre = [];
-  var dures=''
+  var dures = "";
+  var numeration = [];
+  var contBeat = 1;
   for (var a = 0; a < Notes.length; a++) {
     var nome = Notes[a].name;
     // console.log(JSON.stringify(Notes[a]))
     var dura = Notes[a].durationTicks / PPQ2;
     var dure = searchAprox(dura);
-    dures += dure+' ';
-  
-    
+    dures += dure + " ";
     var piti = abcToDoremi(nome);
-    
+    numeration[a] = a + 1 + "/" + contBeat + ": " + nome + " " + piti + " ";
     notesAbc += nome + " ";
-    nomes.push(nome)
+    nomes.push(nome);
     notesSol += piti;
     //var dures1=proporDurations(dures.split(' '),pitir.split(' '))
     //var mix=mixArray(pitir,dures1)
- 
-    
+
     var foj = notesSol;
     //console.log(foj)
     solre = searchConcept(foj);
-
     var signo = solre[0];
     if (signo === undefined) {
       signo = "&nbsp;";
@@ -221,62 +244,62 @@ function notesBlock(ntrack) {
     notis.push(notesAbc);
     signis.push(signo);
     fou.push(capital(notesSol));
-    
-    ///// FORMAT SOLRESOL RHYTHM 
-      var dupro = dures;
-    dupro=dupro.slice(0, -1);
-    var duprop=dupro.split(' ')
-    var duresP=proporDurations(duprop)
-      
-    var noter=[]
-    var pitir=''
-    for(var k=0;k<nomes.length;k++){
-       pitir = abcToDoremir(nomes[k],duresP[k]);
-       notesSolr.push(pitir);
-     
-      if(k==0){
-      noter.push(capital(pitir))
-      }else{noter.push(pitir)}
-       // console.log('pitir', pitir)
+    ///// FORMAT SOLRESOL RHYTHM
+    var dupro = dures;
+    dupro = dupro.slice(0, -1);
+    var duprop = dupro.split(" ");
+    var duresP = proporDurations(duprop);
+    var noter = [];
+    var pitir = "";
+    for (var k = 0; k < nomes.length; k++) {
+      pitir = abcToDoremir(nomes[k], duresP[k]);
+      notesSolr.push(pitir);
+      if (k == 0) {
+        noter.push(capital(pitir));
+      } else {
+        noter.push(pitir);
+      }
+      // console.log('pitir', pitir)
     }
-    var pronu=proporDurNumber(duprop)
+    var pronu = proporDurNumber(duprop);
     //console.log('ProporDures', duprop,  pronu)
-//JSON.stringify(duresP),JSON.stringify(noter))
+    //JSON.stringify(duresP),JSON.stringify(noter))
     //four.push(capital(notesSolr.join('')));
-    
-    
-    
-    four.push(pronu+''+noter.join(''))
-    if (a % 4 == 0 && a > 0) {
-      dures="";
-      notesAbc = ""; 
+    four.push(pronu + "" + noter.join(""));
+    if (contBeat == 4) {
+      dures = "";
+      notesAbc = "";
       solre = "";
       notesSol = "";
-      nomes=[]
+      nomes = [];
       notesSolr = [];
-          
+    }
+    contBeat++;
+    if (contBeat > 4) {
+      contBeat = 1;
     }
   }
   resultParts = [];
-  resultParts[0] = [...duration];
-  resultParts[1] = [...notis];
-  resultParts[2] = [...signis];
-  resultParts[3] = [...fou];
-  resultParts[4] = [...four];
-  
-  
-   var mixParts= mixArrays(resultParts)
+  resultParts[0] = [...numeration];
+  resultParts[1] = [...duration];
+  resultParts[2] = [...notis];
+  resultParts[3] = [...signis];
+  resultParts[4] = [...fou];
+  resultParts[5] = [...four];
+
+  var mixParts = mixArrays(resultParts);
   //var textos = finder(resultParts, [2,4]);
-  var textos = finder4(mixParts, [0,5,2]); // [test in, number of elements, index]
-  var onlyFour = finderAll(mixParts, [0,5]); 
-  
+  //-->var textos = finder4(mixParts, [0, 5, 2]); // [test in, number of elements, index]
+  //-->var onlyFour = finderAll(mixParts, [0, 5]);
+
   //var notas=filtra(resultParts,0)
   //console.log('textos ',JSON.stringify(notas))
   //var textos = resultParts[2]
   //select("#info2").html(textos.join(" ") + "<hr>", 1);
-  select("#info2").html(textos + "<hr>", 1);
+  //-->select("#info2").html(textos + "<hr>", 1);
   //select("#info2").html(cad2 + "<hr>", 1);
-  select("#info2").html(onlyFour.join('<br>'), 1);
+  //select("#info2").html(onlyFour.join("<br>"), 1);
+  select("#info2").html(mixParts.join("<br>"), 1);
 }
 
 function capital(cap) {
@@ -683,26 +706,25 @@ function scientificToDoremi0(scientificNotation) {
   return doremiNotation;
 }
 
-
 function abcToDoremi(abcNote) {
   const notes = {
     C: "do",
     "C#": "do",
     D: "re",
     "D#": "re",
-    "Db": "re",
+    Db: "re",
     E: "mi",
-    "Eb": "mi",
+    Eb: "mi",
     F: "fa",
     "F#": "fa",
     G: "sol",
     "G#": "sol",
-    "Gb": "sol",
+    Gb: "sol",
     A: "la",
     "A#": "la",
-    "Ab": "la",
+    Ab: "la",
     B: "si",
-    "Bb": "si",
+    Bb: "si",
   };
 
   const octaves = {
@@ -722,8 +744,8 @@ function abcToDoremi(abcNote) {
   if (match === null) {
     throw new Error("Invalid note: " + abcNote);
     // or return null; or return some default value;
-    console.log('falseNote',abcNote)
-    return ""
+    console.log("falseNote", abcNote);
+    return "";
   }
 
   const note = notes[match[1]];
@@ -734,28 +756,25 @@ function abcToDoremi(abcNote) {
   return note;
 }
 
-
-
-
 function abcToDoremi2(abcNote) {
   const notes = {
     C: "do",
     "C#": "do",
     D: "re",
     "D#": "re",
-    "Db": "re",
+    Db: "re",
     E: "mi",
-    "Eb": "mi",
+    Eb: "mi",
     F: "fa",
     "F#": "fa",
     G: "sol",
     "G#": "sol",
-    "Gb": "sol",
+    Gb: "sol",
     A: "la",
     "A#": "la",
-    "Ab": "la",
+    Ab: "la",
     B: "si",
-    "Bb": "si",
+    Bb: "si",
   };
 
   const octaves = {
@@ -779,28 +798,27 @@ function abcToDoremi2(abcNote) {
   return note;
 }
 
+function abcToDoremir(note, dura) {
+  note = note.replaceAll("-", "");
 
-function abcToDoremir(note,dura) {
-   note=note.replaceAll('-','')
- 
   const notes = {
-    "C": "do",
+    C: "do",
     "C#": "dó",
-    "Db": "dó",
-    "D": "re",
+    Db: "dó",
+    D: "re",
     "D#": "ré",
-    "Eb": "ré",
-    "E": "mi",
-    "F": "fa",
+    Eb: "ré",
+    E: "mi",
+    F: "fa",
     "F#": "fá",
-    "Gb": "fá",
-    "G": "sol",
+    Gb: "fá",
+    G: "sol",
     "G#": "sól",
-    "Ab": "sól",
-    "A": "la",
+    Ab: "sól",
+    A: "la",
     "A#": "lá",
-    "Bb": "lá",
-    "B": "si",
+    Bb: "lá",
+    B: "si",
   };
 
   const octaves = {
@@ -879,33 +897,31 @@ function transParts4(nums, compas) {
 }
 
 function finderAll(arr, options) {
-  const [findThis,long] = options;
+  const [findThis, long] = options;
   const result = [];
   for (let i = 0; i < arr.length; i++) {
-   
-    if (arr[i][findThis] !== undefined){
-     var findi=arr[i][findThis].split(' ')
-     if(findi.length==long){     
-       result.push(arr[i]);
-     }
+    if (arr[i][findThis] !== undefined) {
+      var findi = arr[i][findThis].split(" ");
+      if (findi.length == long) {
+        result.push(arr[i]);
+      }
     }
   }
-  return result
+  return result;
 }
 
 function finder4(arr, options) {
-  const [findThis,long,returnThis] = options;
+  const [findThis, long, returnThis] = options;
   const result = [];
   for (let i = 0; i < arr.length; i++) {
-   
-    if (arr[i][findThis] !== undefined){
-     var findi=arr[i][findThis].split(' ')
-     if(findi.length==long){     
-       result.push(arr[i][returnThis]);
-     }
+    if (arr[i][findThis] !== undefined) {
+      var findi = arr[i][findThis].split(" ");
+      if (findi.length == long) {
+        result.push(arr[i][returnThis]);
+      }
     }
   }
-  return result
+  return result;
 }
 
 function finder(arr, options) {
@@ -916,12 +932,9 @@ function finder(arr, options) {
       result.push(arr[divisor][i]);
     }
   }
-  
+
   return result;
 }
-
-
-
 
 function filtra(arr, n, r) {
   return arr
@@ -940,7 +953,7 @@ function filtra2(arr, n) {
 
 function mixArrays(arrays) {
   const result = [];
-  const maxLength = Math.max(...arrays.map(arr => arr.length));
+  const maxLength = Math.max(...arrays.map((arr) => arr.length));
 
   for (let i = 0; i < maxLength; i++) {
     const subresult = [];
@@ -958,8 +971,6 @@ function mixArrays(arrays) {
   return result;
 }
 
-
-
 function mixArray(A, B) {
   const result = [];
 
@@ -969,8 +980,6 @@ function mixArray(A, B) {
 
   return result;
 }
-
-
 
 function proporDurNumber(durations) {
   let propor = [];
@@ -1005,20 +1014,18 @@ function proporDurNumber4(durations) {
   return Math.max(1, Math.min(8, result)); // Limitamos el resultado al rango de 1 a 8
 }
 
-
 function proporNumber2(durations) {
-  const ratios = durations.map((dur) => mias[dur]); 
+  const ratios = durations.map((dur) => mias[dur]);
   const totalRatio = ratios.reduce((acc, val) => acc + val, 0);
-  const meanRatio = totalRatio / ratios.length; 
-  const meanDuration = 1 / meanRatio; 
-  const durationInEights = meanDuration / 0.125; 
-  return Math.round(durationInEights); 
+  const meanRatio = totalRatio / ratios.length;
+  const meanDuration = 1 / meanRatio;
+  const durationInEights = meanDuration / 0.125;
+  return Math.round(durationInEights);
 }
 
-
 function proporDurations2(durations, notas) {
-   const propor = durations.map((dur, i) => {
-    if (i === durations.length - 1) return 1; 
+  const propor = durations.map((dur, i) => {
+    if (i === durations.length - 1) return 1;
     const durValue = mias[dur];
     const nextDurValue = mias[durations[i + 1]];
     return nextDurValue / durValue;
@@ -1039,29 +1046,27 @@ function proporDurations(durations) {
   const duraciones = durations.map((d) => mias[d]);
   const duracionTotal = duraciones.reduce((sum, duracion) => sum + duracion);
 
-  
   const propor = duraciones.map((duracion) => duracion / duracionTotal);
 
- 
   const simbol = propor.map((p, i) => {
-    if (p === Math.max(...propor) && Math.max(...propor) !== Math.min(...propor)) {
+    if (
+      p === Math.max(...propor) &&
+      Math.max(...propor) !== Math.min(...propor)
+    ) {
       return "n";
     } else {
       return "";
     }
   });
 
-  if (new Set(simbol).size === 1 && simbol[0] === 'n') {
-    return Array(duraciones.length).fill('');
+  if (new Set(simbol).size === 1 && simbol[0] === "n") {
+    return Array(duraciones.length).fill("");
   }
 
   return simbol;
 }
 
-
-
 function proporDurations6(durations) {
-  
   // Calcula la duración total de cada símbolo en el array "durations"
   const duraciones = durations.map((d) => mias[d]);
   const duracionTotal = duraciones.reduce((sum, duracion) => sum + duracion);
@@ -1081,7 +1086,6 @@ function proporDurations6(durations) {
   return simbol;
 }
 
-
 function proporDurations4(durations) {
   const propor = durations.map((dur, i) => {
     if (i === durations.length - 1) return 1; // el último elemento siempre tiene una proporción de 1
@@ -1098,8 +1102,6 @@ function proporDurations4(durations) {
 
   return simbol;
 }
-
-
 
 function termina() {
   //console.log(JSON.stringify(tracks))
@@ -1149,162 +1151,182 @@ function charged() {
   //console.log(plavi)
   var nn = 0;
   var contnotes = 0;
-  var div = document.getElementById("player15");
-  var contEvent = 0;
-  var contnotesS = 0;
-  div.addEventListener("note", (event) => {
-    var wordSol = ''
-    var signi=''
-    var dures=''
-    var duresi=[]
-    var wordSolr=''
-    if(contEvent>0){
-      wordSol = resultParts[3][contEvent];
-      signi = resultParts[2][contEvent];
-      dures = resultParts[0][contEvent];
-      if( dures !== undefined ){
-       if(dures.length>1){
-          duresi=dures.split(' ')
-        }else{
-         duresi=''
-      }
-      } else {
-        duresi=''
-      }
-     //wordSolr = resultParts[4][contEvent];
+  
+  contEvent = 1;
+  //var contnotesS = 0;
+
+  contBeat = 1;
+  solre = "";
+  cumulNote = "";
+  cumulSolr = "";
+  cumulAbc = "";
+  cumulRhy = "";
+  select("#div1-1").html("");
+  select("#div2-1").html("");
+  select("#div1-2").html("");
+  select("#div2-2").html("");
+  select("#div1-3").html("");
+  select("#div2-3").html("");
+  select("#div1-4").html("");
+  select("#div2-4").html("");
+  select("#divResume").html("");
+  resultParts = [];
+  select("#info2").html("");
+  
+ 
+}
+
+
+ //var divi = document.getElementById("player15");
+
+ // divi.addEventListener("note", (event) => {
+
+function eventNote(){
+    if (contEvent < 2) {
+      select("#div1-1").html("");
+      select("#div2-1").html("");
+      select("#div1-2").html("");
+      select("#div2-2").html("");
+      select("#div1-3").html("");
+      select("#div2-3").html("");
+      select("#div1-4").html("");
+      select("#div2-4").html("");
+      select("#divResume").html("");
     }
+    /*
+    wordSol = resultParts[3][contEvent];
+    signi = resultParts[2][contEvent];
+    dures = resultParts[0][contEvent];
+    if (dures !== undefined) {
+      if (dures.length > 1) {
+        duresi = dures.split(" ");
+      } else {
+        duresi = "";
+      }
+    } else {
+      duresi = "";
+    }
+    */
+    //wordSolr = resultParts[4][contEvent];
+    //}
+   // console.log(JSON.stringify(event));
+    var rval =
+      (15 / BPM) * (event.detail.note.endTime - event.detail.note.startTime);
+    //var ticks = Tone.Ticks(secs,'seconds').toSeconds();
+    //console.log("rhyhthm " + rval);
+    var duri = searchAprox(rval);
     var piti = event.detail.note.pitch;
     var pite = Tone.Frequency(piti, "midi").toNote();
+    var pido = abcToDoremi(pite);
+    var pidor = abcToDoremir(pite, "");
     //var pito = abcToDoremir(pite);
-   
-    
+
     //infot.html(signi +''+wordSol+'')
-    if(duresi.length==5){
-   
-    select("#iSolresol").html(wordSol);
-      select("#ileft").html(signi);
-    }
-    select("#iSolresolr").html(pite) ;
+
+    cumulAbc += pite + " ";
+    cumulNote += pido;
+    cumulSolr += pidor;
+    cumulRhy += duri + " ";
+    var sol1 = searchConcept(cumulNote);
+    var cacul = capital(cumulNote);
     //infot.html( contEvent +' '+pito+' '+ wordSol+' '+signi)
     //}
+
+    //select("#div2-1").html(capital(cumulNote))
+    if (contBeat == 1) {
+      //var sol1 = searchConcept(cumulNote);
+      if (sol1[0] === undefined) {
+        sol1 = [" "];
+      }
+      select("#div1-1").html(sol1[0]);
+      select("#div2-1").html(cacul);
+    }
+    if (contBeat == 2) {
+      //var sol2 = searchConcept(cumulNote);
+      if (sol1[0] === undefined) {
+        sol1 = [" "];
+      }
+      select("#div1-2").html(sol1[0]);
+      select("#div2-2").html(cacul);
+    }
+    if (contBeat == 3) {
+      //var sol3 = searchConcept(cumulNote);
+      if (sol1[0] === undefined) {
+        sol1 = [" "];
+      }
+      select("#div1-3").html(sol1[0]);
+      select("#div2-3").html(cacul);
+    }
+    if (contBeat == 4) {
+      //var sol4 = searchConcept(cumulNote);
+      if (sol1[0] === undefined) {
+        sol1 = [" "];
+      }
+      select("#div1-4").html(sol1[0]);
+      select("#div2-4").html(cacul);
+      //select("#iSolresolSketch").html('')
+    }
+
+    select("#divResume").html(
+      contEvent +
+        "/" +
+        contBeat +
+        ": " +
+        pite +
+        " " +
+        pido +
+        " " +
+        cacul +
+        " " +
+        sol1[0]
+    );
+
+   var inpute = {};
+    inpute.contEvent = contEvent;
+    inpute.contBeat = contBeat;
+    inpute.noteAbc = pite;
+    inpute.noteDoremi = pido;
+    inpute.noteRhy = pidor;
+    inpute.cumulAbc = cumulAbc;
+    inpute.cumulDoremi = cacul;
+    inpute.concept = sol1[0];
+    inpute.cumulRhy = cumulRhy;
+    inpute.cumulSolr = cumulSolr;
+    resultParts.push(inpute)
+    var obva = Object.values(inpute);
+    var obvi = obva.slice(2, 33);
+    var preo =
+      inpute.contEvent +
+      "/" +
+      inpute.contBeat +
+      " ";
+    select("#info2").html(
+      '<div class="divlist">' + preo + " " + obvi.join(", ") + "</div>",
+      1
+    );
+    contBeat += 1;
+    if (contBeat > 4) {
+      contBeat = 1;
+      cumulNote = "";
+      cumulSolr = "";
+      cumulAbc = "";
+      cumulRhy = "";
+    }
+
     contEvent++;
-    if (contEvent >= div.noteSequence.notes.length) {
-      contEvent = 0;
+    if (contEvent > divi.noteSequence.notes.length) {
+      contEvent = 1;
+      contBeat = 1;
+      cumulNote = "";
+      cumulSolr = "";
+      cumulAbc = "";
+      cumulRhy = "";
+      resultPart = [];
     }
     //if(nn>resultParts.length-1){nn=0;}
     //}
-  });
-}
+  }
 
-function charged0() {
-  var playi = select("#player15");
-  var expi = select("#expi");
-  var infot = select("#infotrack");
-  var info = select("#info");
-  expi.show();
-  expi.mousePressed(function () {
-    info.html(
-      '<br><a id="linktext" download="' +
-        nameFileTrack +
-        '.mid"  href="' +
-        escribe.dataUri() +
-        '">' +
-        nameFileTrack +
-        ".mid</a>&nbsp;" +
-        //'<a id="linktextWav" href="' +
-        //srcw +
-        //'" target="_blank">Wav file</a>'+
-        "<p>&nbsp;</p>" +
-        "" +
-        "" +
-        "<p>&nbsp;</p>"
-    );
-
-    expi.hide();
-
-    var lise = select("#linktext");
-    lise.mousePressed(function () {
-      setTimeout(function () {
-        lise.hide();
-      }, 2000);
-    });
-  });
-  select("#section15 midi-visualizer").hide();
-  playi.attribute("src", escribe.dataUri());
-  playi.mouseClicked(function () {
-    select("#section15 midi-visualizer").show();
-  });
-  //var plavi=select('#section15 midi-visualizer')
-  //console.log(plavi)
-  var nn = 0;
-  var contnotes = 0;
-  var div = document.getElementById("player15");
-  var contEvent = 0;
-  //console.log(resultParts)
-  // https://github.com/cifkao/html-midi-player/blob/master/doc/midi-player.md#midi-player
-  var notesi = playi.attribute("noteSequence");
-  console.log(JSON.stringify(notesi));
-  var contnotesS = 0;
-  div.addEventListener("note", (event) => {
-    //console.log(JSON.stringify(event.detail));
-    //var curri=select("#player15").attribute("currentTime")
-    var curri = div.currentTime;
-    //var curri=div.noteSequence.notes[contEvent].startTime
-
-    //var curri=div.duration
-    //var notesi=JSON.stringify(div.noteSequence)
-    //console.log(notesi)
-    //var curri=''
-    //soundsR pitch=32
-    var piti = event.detail.note.pitch;
-    var pite = Tone.Frequency(piti, "midi").toNote();
-    var pito = abcToDoremir(pite);
-    /*var volu = event.detail.note.velocity;
-    var instru = event.detail.note.instrument;
-    var seta = event.detail.note.startTime;
-    var chante = event.detail.note.program;
-    */
-    //console.log('Curri: ',JSON.stringify(curri))
-    var wordText = resultParts[nn][2][0];
-    var wordSol = resultParts[nn][3];
-    var wordSolR = resultParts[nn][4];
-    var wordTime = resultParts[nn][5];
-    //var seta = event.detail.note.startTime;
-    // infot.html(contEvent+ ' ' + contnotesS+' '+seta+' '+wordTime  )
-    //if(curri==resultParts[nn][5]){
-    infot.html(
-      nn +
-        " / " +
-        contEvent +
-        " " +
-        pito +
-        " " +
-        wordText +
-        " " +
-        wordSol +
-        " " +
-        wordSolR
-    );
-    //}
-
-    var nnotes = resultParts[nn][0].length;
-    contnotes++;
-
-    //console.log(resultParts.notes)
-    if (contnotes >= nnotes) {
-      contnotes = 0;
-      //nn++;
-      //contnotesS+=nnotes;
-      nn = contEvent;
-    }
-    contEvent++;
-    if (contEvent > div.noteSequence.notes.length) {
-      contEvent = 0;
-    }
-    //if(nn>resultParts.length-1){nn=0;}
-    //}
-  });
-}
 
 function createMetaTag() {
   //https://openprocess4.org/sketch/790331
