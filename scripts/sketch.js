@@ -1195,6 +1195,8 @@ function eventNote(){
       select("#div2-4").html("");
       select("#divResume").html("");
       nextCumul=1
+      select("#info2").html('')
+      resultPart = [];
     }
     /*
     wordSol = resultParts[3][contEvent];
@@ -1360,8 +1362,8 @@ function eventNote(){
       cumulAbc = "";
       cumulRhy = "";
       cumulConcept=""
-      resultPart = [];
-       select("#info2").html('')
+     
+    
     }
     //if(nn>resultParts.length-1){nn=0;}
     //}
