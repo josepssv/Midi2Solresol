@@ -41,6 +41,7 @@ var cumulNote = "";
 var cumulSolr = "";
 var cumulAbc = "";
 var cumulRhy = "";
+var cumulConcept = "";
 
 function handleFiles() {
   const fileList = this.files; /* now you can work with the file list */
@@ -1153,8 +1154,6 @@ function charged() {
   var contnotes = 0;
   
   contEvent = 1;
-  //var contnotesS = 0;
-
   contBeat = 1;
   solre = "";
   cumulNote = "";
@@ -1169,9 +1168,10 @@ function charged() {
   select("#div2-3").html("");
   select("#div1-4").html("");
   select("#div2-4").html("");
-  select("#divResume").html("");
-  resultParts = [];
+  select("#divResume").html("");    
   select("#info2").html("");
+  resultParts = [];
+ 
   
  
 }
@@ -1266,7 +1266,8 @@ function eventNote(){
       select("#div2-4").html(cacul);
       //select("#iSolresolSketch").html('')
     }
-
+   cumulConcept+=sol1[0]+' '
+  
     select("#divResume").html(
       contEvent +
         "/" +
@@ -1306,11 +1307,16 @@ function eventNote(){
     );
     contBeat += 1;
     if (contBeat > 4) {
+        select("#info2").html(
+      '<div class="divlist" style="color:#990;">' +cumulConcept + "</div>",
+      1
+    );
       contBeat = 1;
       cumulNote = "";
       cumulSolr = "";
       cumulAbc = "";
       cumulRhy = "";
+      cumulConcept="";
     }
 
     contEvent++;
@@ -1321,6 +1327,7 @@ function eventNote(){
       cumulSolr = "";
       cumulAbc = "";
       cumulRhy = "";
+      cumulConcept=""
       resultPart = [];
     }
     //if(nn>resultParts.length-1){nn=0;}
