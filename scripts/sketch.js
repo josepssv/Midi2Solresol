@@ -1180,6 +1180,8 @@ function charged() {
  //var divi = document.getElementById("player15");
 
  // divi.addEventListener("note", (event) => {
+const cumulList=[0,1,2,3,4]
+var nextCumul=1
 
 function eventNote(){
     if (contEvent < 2) {
@@ -1192,6 +1194,7 @@ function eventNote(){
       select("#div1-4").html("");
       select("#div2-4").html("");
       select("#divResume").html("");
+      nextCumul=1
     }
     /*
     wordSol = resultParts[3][contEvent];
@@ -1233,12 +1236,13 @@ function eventNote(){
     //}
 
     //select("#div2-1").html(capital(cumulNote))
+    
     if (contBeat == 1) {
       //var sol1 = searchConcept(cumulNote);
       if (sol1[0] === undefined) {
         sol1 = [" "];
       }
-      select("#div1-1").html(sol1[0]);
+      //select("#div1-1").html(sol1[0]);
       select("#div2-1").html(cacul);
     }
     if (contBeat == 2) {
@@ -1246,7 +1250,7 @@ function eventNote(){
       if (sol1[0] === undefined) {
         sol1 = [" "];
       }
-      select("#div1-2").html(sol1[0]);
+      //select("#div1-2").html(sol1[0]);
       select("#div2-2").html(cacul);
     }
     if (contBeat == 3) {
@@ -1254,7 +1258,7 @@ function eventNote(){
       if (sol1[0] === undefined) {
         sol1 = [" "];
       }
-      select("#div1-3").html(sol1[0]);
+      //select("#div1-3").html(sol1[0]);
       select("#div2-3").html(cacul);
     }
     if (contBeat == 4) {
@@ -1262,11 +1266,12 @@ function eventNote(){
       if (sol1[0] === undefined) {
         sol1 = [" "];
       }
-      select("#div1-4").html(sol1[0]);
+      //select("#div1-4").html(sol1[0]);
       select("#div2-4").html(cacul);
       //select("#iSolresolSketch").html('')
     }
-   cumulConcept+=sol1[0]+' '
+    
+   //cumulConcept+=sol1[0]+' '
   
     select("#divResume").html(
       contEvent +
@@ -1305,18 +1310,45 @@ function eventNote(){
       '<div class="divlist">' + preo + " " + obvi.join(", ") + "</div>",
       1
     );
-    contBeat += 1;
-    if (contBeat > 4) {
+   
+    
+  
+    if (nextCumul == contEvent) {
+       cumulConcept+=sol1[0]+' '
         select("#info2").html(
       '<div class="divlist" style="color:#990;">' +cumulConcept + "</div>",
       1
     );
-      contBeat = 1;
+      if (contBeat==1){
+        
+      select("#div1-1").html(sol1[0]);
+      select("#div1-2").html('');
+      select("#div1-3").html('');
+      select("#div1-4").html('');
+      
+      select("#div2-2").html('');
+      select("#div2-3").html('');
+      select("#div2-4").html('');
+      }
+      if (contBeat==2){
+      select("#div1-2").html(sol1[0]);
+      }
+      if (contBeat==3){
+      select("#div1-3").html(sol1[0]);
+      }
+      if (contBeat==4){
+      select("#div1-4").html(sol1[0]);
+       cumulConcept=""; 
+      }
+      
+      contBeat += 1;
+     if(contBeat>=cumulList.length){contBeat=1; }
+    nextCumul += cumulList[contBeat];
       cumulNote = "";
       cumulSolr = "";
       cumulAbc = "";
       cumulRhy = "";
-      cumulConcept="";
+     
     }
 
     contEvent++;
@@ -1329,6 +1361,7 @@ function eventNote(){
       cumulRhy = "";
       cumulConcept=""
       resultPart = [];
+       select("#info2").html('')
     }
     //if(nn>resultParts.length-1){nn=0;}
     //}
