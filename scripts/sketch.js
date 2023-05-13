@@ -175,19 +175,30 @@ function toSolresolP(ntrack) {
 
   //console.log('instr ',instr)
   var compo = [];
-
+  var pretime=[0,0]
+  var memonote=[]
   for (var a = 0; a < Notes.length; a++) {
+    pretime[1]=Notes[a].time
+    
+    if(pretime[0]==pretime[1]){
+      memonote.push(Notes[a].name)
+    }else{
+    memonote.push(Notes[a].name)
     compo = [];
     compo[0] = instr;
     compo[1] = "" + parseInt(Notes[a].velocity * 100);
     compo[2] = 0;
-    compo[3] = [Notes[a].name];
+    //compo[3] = [Notes[a].name];
+    compo[3] = memonote;
     compo[4] = "T" + Notes[a].durationTicks;
     compo[5] = channel;
     compo[6] = 1;
     compo[7] = false;
     //console.log(JSON.stringify(Notes[a]))
     otro(nt, compo);
+    memonote=[]
+    }
+    pretime[0]=Notes[a].time
   }
   nameFileTrack =
     nameFile + "_" + ntrack + "_" + suite.tracks[ntrack].instrument.name;
